@@ -1,0 +1,12 @@
+#python basics
+pylint
+yapf
+
+
+#ia
+scikit-learn
+pandas
+numpy
+pylab
+copy
+matplotlib
