@@ -1,3 +1,4 @@
+pylab
 #python basics
 pylint
 yapf
@@ -7,6 +8,4 @@ yapf
 scikit-learn
 pandas
 numpy
-pylab
-copy
 matplotlib
