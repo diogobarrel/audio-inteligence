@@ -1,8 +1,12 @@
 """
 Driver
 """
-from dataviz import dataviz
+from audio.audio import AudioFile
 
-print('Audio Inteligence ftw')
+from util.host import get_samples
 
-dataviz.plot_spectrum()
+audio_samples = get_samples()
+
+for sample in audio_samples:
+    audio_file = AudioFile(sample)
+    print(audio_file.read_props())
