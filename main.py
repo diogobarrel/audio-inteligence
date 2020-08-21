@@ -9,4 +9,4 @@ audio_samples = get_samples()
 
 for sample in audio_samples:
     audio_file = AudioFile(sample)
-    print(audio_file.read_props())
+    print(audio_file.extract_features())
