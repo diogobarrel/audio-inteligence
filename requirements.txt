@@ -8,6 +8,7 @@ scikit-learn
 pandas
 numpy
 matplotlib
+scipy
 
 torch
 torchaudio

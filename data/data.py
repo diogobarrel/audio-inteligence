@@ -31,7 +31,7 @@ def build_features_dataframe():
         print(file_name, class_label)
         audio_file = AudioFile(file_name)
 
-        data = audio_file.extract_features()
+        data = audio_file.extract_mfcc_features()
         print(data)
 
         features.append([data, class_label])

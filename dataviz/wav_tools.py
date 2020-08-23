@@ -37,7 +37,7 @@ class WavFileHelper():
 
         return (num_channels, sample_rate, bit_depth)
 
-    def signal(self, filename, sample_frequency=16000):
+    def signal(self, filename: str, sample_frequency: int = 16000):
         """ draw signal wave file and sectrum of signal """
         signal_wave = wave.open(filename, 'r')
 

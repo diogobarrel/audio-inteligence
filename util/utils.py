@@ -1,5 +1,6 @@
 import time
 
+
 def timeit(function):
     '''Decorator used for debugging. Prints the call and how long it took.'''
     def timed(*args, **kwargs):
