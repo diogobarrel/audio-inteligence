@@ -1,9 +1,8 @@
 """
-Audio File base
+Audio File basic handling
 """
 import struct
 import logging
-
 import librosa
 import numpy as np
 
@@ -36,16 +35,16 @@ class AudioFile:
 
         return (num_channels, sample_rate, bit_depth)
 
-    def extract_features(self) -> list:
+    def extract_mfcc_features(self) -> list:
         """
         Extracts mfcc and mfccs from audio file
         """
 
         try:
-
             # converts the sampling rate to 22.05 KHz
             # normalise the data so the bit-depth values range between -1 and 1
             # flattens the audio channels into mono
+
             audio, sample_rate = librosa.load(
                 self.file, res_type='kaiser_fast')
 
@@ -54,7 +53,9 @@ class AudioFile:
 
         except Exception as e:
             logging.exception(
-                "Error encountered while parsing file: %s", self.file)
+                "Exception while parsing file: %s", self.file)
+            logging.exception(e)
+
             return None
 
         return mfccsscaled
