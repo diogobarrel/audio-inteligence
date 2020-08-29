@@ -10,11 +10,13 @@ numpy
 matplotlib
 scipy
 
-torch
-torchaudio
+# torch
+# torchaudio
+keras
 
 # audio
 wave # stuff to parse WAV files
 pyaudio # used to connect to input and record audio
 simpleaudio # generates and play audio files
 librosa # audio normalization
+
