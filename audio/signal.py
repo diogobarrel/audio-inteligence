@@ -1,6 +1,7 @@
 """
 Build signals
 """
+from matplotlib import cm
 import wave
 
 from pprint import pprint
@@ -137,3 +138,23 @@ def stft_spectogram(audio_file: str, index: str = 'X'):
         else:
             plt.savefig(f'spectrogram{index}.png')
     return plotstft(audio_file)
+
+
+def draw_mfcc(audio_file: str, index=''):
+    from python_speech_features import mfcc
+
+    (rate, sig) = wavfile.read(audio_file)
+
+    mfcc_feat = mfcc(sig, rate)
+
+    ig, ax = plt.subplots()
+    mfcc_data = np.swapaxes(mfcc_feat, 0, 1)
+    cax = ax.imshow(mfcc_data, interpolation='nearest',
+                    cmap=cm.coolwarm, origin='lower', aspect='auto')
+    ax.set_title('MFCC')
+    # Showing mfcc_data
+    if index:
+        plt.savefig(f'{index}')
+        return
+
+    plt.show()
