@@ -8,11 +8,15 @@ import numpy as np
 
 
 class AudioFile:
+    """
+    Base AudioFile class
+    """
     file = None
+    __file_type = 'wav'
 
     def __init__(self, file: str):
         self.file = file
-        print(self)
+        print(f'new AudioFile {self}')
 
     def read_props(self) -> (int, int, int):
         """
@@ -44,7 +48,6 @@ class AudioFile:
             # converts the sampling rate to 22.05 KHz
             # normalise the data so the bit-depth values range between -1 and 1
             # flattens the audio channels into mono
-
             audio, sample_rate = librosa.load(
                 self.file, res_type='kaiser_fast')
 

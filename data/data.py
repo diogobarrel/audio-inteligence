@@ -49,7 +49,7 @@ def build_features_dataframe(pkl: str):
     featuresdf.to_pickle(pkl)
 
 
-def red_dataframe(audio_file: str):
+def read_dataframe(audio_file: str):
     return pd.read_pickle(audio_file)
 
 @timeit
