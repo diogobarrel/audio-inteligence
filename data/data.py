@@ -19,7 +19,7 @@ from keras.utils import to_categorical
 @timeit
 def build_features_dataframe(pkl: str):
     """
-    uses metadata info to load all dataset files and build
+    Uses metadata info to load all dataset files and build
     a pandas dataframe of those audio features
     """
     features = []
@@ -48,14 +48,14 @@ def build_features_dataframe(pkl: str):
 
     featuresdf.to_pickle(pkl)
 
-
+@timeit
 def read_dataframe(audio_file: str):
     return pd.read_pickle(audio_file)
 
 @timeit
 def split_data(features_dataframe: str):
     """
-    Convert features and corresponding classification
+    Converts features and corresponding classification
     labels into numpy arrays
     """
     X = np.array(features_dataframe.feature.tolist())

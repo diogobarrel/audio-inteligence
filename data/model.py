@@ -3,6 +3,7 @@ import numpy as np
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation
 from keras.layers import Conv2D, MaxPooling2D, GlobalAveragePooling2D
+from keras.callbacks import ModelCheckpoint
 
 from sklearn import metrics
 
@@ -33,12 +34,11 @@ def build_model(x_train: list, x_test, yy):
     num_channels = 1
 
     x_train = x_train.reshape(
-        x_train.shape[0], num_rows, num_columns, num_channels)
+        x_train.shape[0])
     x_test = x_test.reshape(
-        x_test.shape[0], num_rows, num_columns, num_channels)
+        x_test.shape[0])
 
     num_labels = yy.shape[1]
-    filter_size = 2
 
     # Construct model
     model = Sequential()
@@ -86,9 +86,7 @@ def compile_model(model, x_test, y_test):
     return model
 
 
-
 def train_model(model, x_train, y_train, x_test, y_test):
-    from keras.callbacks import ModelCheckpoint
 
     num_epochs = 72
     num_batch_size = 256
