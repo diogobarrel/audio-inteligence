@@ -1,4 +1,5 @@
 import numpy as np
+import tensorflow as tf
 
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation
@@ -29,6 +30,7 @@ def build_model(x_train: list, x_test, yy):
     https://medium.com/@mikesmales/sound-classification-using-deep-learning-8bc2aa1990b7
     """
 
+    ## DATA FORMAT
     num_rows = 40
     num_columns = 174
     num_channels = 1
@@ -77,14 +79,15 @@ def compile_model(model, x_test, y_test):
 
     # Display model architecture summary
     model.summary()
+    return model
 
+def model_accuracy(model, x_test, y_test):
     # Calculate pre-training accuracy
     score = model.evaluate(x_test, y_test, verbose=1)
     accuracy = 100*score[1]
 
     print("Pre-training accuracy: %.4f%%" % accuracy)
-    return model
-
+    return accuracy or None
 
 def train_model(model, x_train, y_train, x_test, y_test):
 
@@ -100,3 +103,20 @@ def train_model(model, x_train, y_train, x_test, y_test):
               callbacks=[checkpointer], verbose=1)
 
     return model
+
+
+def cnn(model, data):
+    """ data: data library used  """
+    num_rows = 40
+    num_columns = 174
+    num_channels = 1
+
+    featdf = data.read_dataframe('./featdf.pkl')
+    x_train, x_test, y_train, y_test, le, yy = data.split_data(featdf)
+    x_train = np.reshape(x_train, x_train.shape[0])
+    x_test = np.reshape(x_test, x_test.shape[0])
+
+    cnn_model = model.build_model(x_train, x_test, yy)
+    compiled_cnn_model = model.compile_model(cnn_model, x_train, y_train)
+
+    return compiled_cnn_model, x_test
