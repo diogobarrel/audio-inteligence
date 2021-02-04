@@ -1,3 +1,5 @@
+import logging
+
 import numpy as np
 import tensorflow as tf
 
@@ -30,15 +32,14 @@ def build_model(x_train: list, x_test, yy):
     https://medium.com/@mikesmales/sound-classification-using-deep-learning-8bc2aa1990b7
     """
 
-    ## DATA FORMAT
+    # DATA FORMAT
     num_rows = 40
     num_columns = 174
     num_channels = 1
 
-    x_train = x_train.reshape(
-        x_train.shape[0])
-    x_test = x_test.reshape(
-        x_test.shape[0])
+    x_train = x_train.reshape(x_train.shape[0])
+    x_test = x_test.reshape(x_test.shape[0])
+    model_input_shape = (num_rows, num_columns, num_channels)
 
     num_labels = yy.shape[1]
 
@@ -46,11 +47,13 @@ def build_model(x_train: list, x_test, yy):
     model = Sequential()
 
     # First layer
-    model.add(Conv2D(filters=16, kernel_size=2, input_shape=(
-        num_rows, num_columns, num_channels), activation='relu'))
+    model.add(Conv2D(filters=16,
+                     kernel_size=2,
+                     input_shape=model_input_shape,
+                     activation='relu'))
+
     model.add(MaxPooling2D(pool_size=2))
     model.add(Dropout(0.2))
-
     # Second layer
     model.add(Conv2D(filters=32, kernel_size=2, activation='relu'))
     model.add(MaxPooling2D(pool_size=2))
@@ -73,23 +76,35 @@ def build_model(x_train: list, x_test, yy):
 
 
 def compile_model(model, x_test, y_test):
-    # Compile the model
-    model.compile(loss='categorical_crossentropy',
-                  metrics=['accuracy'], optimizer='adam')
+    """
+    Compiles model based on test dataset
+    """
+    try:
+        model.compile(loss='categorical_crossentropy',
+                      metrics=['accuracy'], optimizer='adam')
+        # Display model architecture summary
+        model.summary()
+        print('Model compiled successfully!')
+        return model
 
-    # Display model architecture summary
-    model.summary()
-    return model
+    except Exception as e:
+        print('Error while compiling model')
+        logging.exception(e)
+        return None
+
 
 def model_accuracy(model, x_test, y_test):
-    # Calculate pre-training accuracy
     score = model.evaluate(x_test, y_test, verbose=1)
     accuracy = 100*score[1]
 
     print("Pre-training accuracy: %.4f%%" % accuracy)
     return accuracy or None
 
+
 def train_model(model, x_train, y_train, x_test, y_test):
+    """
+    Train model based on train and test datasets
+    """
 
     num_epochs = 72
     num_batch_size = 256

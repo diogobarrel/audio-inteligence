@@ -22,8 +22,8 @@ def plot_samples():
 def cnn():
     featdf = data.read_dataframe('./featdf.pkl')
     x_train, x_test, y_train, y_test, le, yy = data.split_data(featdf)
-
     cnn_model = model.build_model(x_train, x_test, yy)
-    # compiled_cnn_model = model.compile_model(cnn_model, x_test, y_test)
+    compiled_cnn_model = model.compile_model(cnn_model, x_test, y_test)
+
 
 cnn()
