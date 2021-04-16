@@ -1,11 +1,15 @@
 """
 Driver
 """
-from data import data, model
+import logging
+
+from data import data_utils
+from data.model import Model as CnnModel
 
 from audio import signal
-from util.host import get_samples
+from util.host import get_samples, URBANSOUND_8K, CHOSEN_DATASET, CHOSEN_METADATA, DATAFRAME
 
+import numpy as np
 
 def plot_samples():
     audio_samples = get_samples()
@@ -13,17 +17,27 @@ def plot_samples():
     for sample in audio_samples:
         # audio_file = AudioFile(sample)
         # print(audio_file.extract_mfcc_features())
-        signal.spectogram(sample, index=f'{ROW}{COL}')
-        signal.stft_spectogram(sample, index=f'{ROW+1}{COL}')
+        signal.spectogram(sample, index=f"{ROW}{COL}")
+        signal.stft_spectogram(sample, index=f"{ROW+1}{COL}")
         # signal.draw_spec3(sample, index=f'{ROW+2}{COL}')
         COL += 1
 
 
-def cnn():
-    featdf = data.read_dataframe('./featdf.pkl')
-    x_train, x_test, y_train, y_test, le, yy = data.split_data(featdf)
-    cnn_model = model.build_model(x_train, x_test, yy)
-    compiled_cnn_model = model.compile_model(cnn_model, x_test, y_test)
+def build_dataframe(dataframe):
+    return data_utils.build_features_dataframe(
+        dataframe, CHOSEN_DATASET, CHOSEN_METADATA
+    )
 
 
-cnn()
+"""
+Justs gonna build dataframe and compile model
+"""
+# try:
+data = data_utils.read_dataframe(f"./{DATAFRAME}")
+if not data or data.empty:
+    df = build_dataframe(DATAFRAME)
+    data = data_utils.read_dataframe(f"./{DATAFRAME}")
+# cnn_model = CnnModel(dataframe=data)
+# cnn_model.train()
+# cnn_model.accuracy()
+#process_audio_files()

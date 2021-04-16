@@ -13,6 +13,10 @@ class AudioFile:
     """
     file = None
     __file_type = 'wav'
+    audio = None
+    sample_rate = 0
+    stft = None
+    _feat = {}
 
     def __init__(self, file: str):
         self.file = file
@@ -39,7 +43,7 @@ class AudioFile:
 
         return (num_channels, sample_rate, bit_depth)
 
-    def extract_mfcc_features(self) -> list:
+    def extract_features(self) -> list:
         """
         Extracts mfcc and mfccs from audio file
         """
@@ -48,17 +52,34 @@ class AudioFile:
             # converts the sampling rate to 22.05 KHz
             # normalise the data so the bit-depth values range between -1 and 1
             # flattens the audio channels into mono
-            audio, sample_rate = librosa.load(
-                self.file, res_type='kaiser_fast')
+            audio, sample_rate = librosa.load(self.file)
+            stft = np.abs(librosa.stft(audio))
+            mfccs = np.mean(librosa.feature.mfcc(
+                y=audio, sr=sample_rate, n_mfcc=40).T, axis=0)
+            chroma = np.mean(librosa.feature.chroma_stft(
+                S=stft, sr=sample_rate).T, axis=0)
+            mel = np.mean(librosa.feature.melspectrogram(
+                audio, sr=sample_rate).T, axis=0)
+            contrast = np.mean(librosa.feature.spectral_contrast(
+                S=stft, sr=sample_rate).T, axis=0)
+            tonnetz = np.mean(librosa.feature.tonnetz(
+                y=librosa.effects.harmonic(audio), sr=sample_rate).T, axis=0)
 
-            mfccs = librosa.feature.mfcc(y=audio, sr=sample_rate, n_mfcc=40)
-            mfccsscaled = np.mean(mfccs.T, axis=0)
+            self.audio = audio
+            self.sample_rate = sample_rate
+            self.stft = stft
+            self._feat = {
+                'mfccs': mfccs,
+                'chroma': chroma,
+                'mel': mel,
+                'contrast': contrast,
+                'tonnetz': tonnetz,
+            }
 
-        except Exception as e:
+        except IOError as io_error:
             logging.exception(
                 "Exception while parsing file: %s", self.file)
-            logging.exception(e)
-
+            logging.exception(io_error)
             return None
-
-        return mfccsscaled
+        except Exception as e:
+            logging.exception(e)

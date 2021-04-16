@@ -13,6 +13,7 @@ scipy
 # torch
 # torchaudio
 keras
+tensorflow
 
 # audio
 wave # stuff to parse WAV files
