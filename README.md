@@ -7,4 +7,12 @@ Also some libraries to audio manipulation were developed so tasks as record, pla
 ## Introduction
 
 ### Audio processing
+As this is a **enviromental audio analysis** project, we will be using known enviromentla audio databases for the training and tuning. Among the used datests are: URBANDOUND8K , MIVIA
+
+I have some audio libs that are able to read, play, plot and extract featctures from `.wav` files
+- `librosa` is used for *feature extraction*`
+- `simpleaudio` is used for *playing and generating audio files*
+
+The chosen feature extraction goes from firstly, getting the short fourier transform function 
+### Data management
 

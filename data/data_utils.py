@@ -68,8 +68,9 @@ def build_features_dataframe(df_name: str, dataset, metadata):
     featuresdf.to_pickle(df_name)
 
 
-def parse_audio_files(parent_dir, sub_dir, file_ext='*.wav'):
-    features, labels = np.empty((0, 193)), np.empty(0)  # 193 => total features
+def proccess_audio_files(parent_dir, sub_dir, file_ext='*.wav'):
+    # 193 => total features shape sommatory, will be the final shape after horizontalization
+    features, labels = np.empty((0, 193)), np.empty(0)
 
     for file_name in glob.glob(os.path.join(parent_dir, sub_dir, file_ext)):
         audio_file = AudioFile(file_name)
