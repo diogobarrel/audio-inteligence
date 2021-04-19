@@ -25,13 +25,7 @@ class Model:
     }
     model = None
 
-    def __init__(self, data=None, labels=None, dataframe=None):
-        if not dataframe.empty:
-            self.__prepare_model_data(dataframe)
-        elif data and labels:
-            self.data["x_train"] = data
-            self.data["y_train"] = labels
-
+    def __init__(self):
         self._build()
         self._compile()
 
@@ -74,54 +68,17 @@ class Model:
         """
 
         # DATA FORMAT
-        num_rows = 40
-        num_columns = 174
-        num_channels = 1
+        input_shape = (193,)
+        num_classes = 10
+        keras.backend.clear_session()
 
-        x_train = self.data["x_train"].reshape(
-            self.data["x_train"].shape[0]
-        )  # size = 6985
-        x_test = self.data["x_test"].reshape(
-            self.data["x_test"].shape[0]
-        )  # size = 6985
-        model_input_shape = (num_rows, num_columns,
-                             num_channels)  # [40, 174, 1]
+        self.model = keras.models.Sequential()
+        self.model.add(keras.layers.Dense(256, activation="relu", input_shape=input_shape))
+        self.model.add(keras.layers.Dense(128, activation="relu", input_shape=input_shape))
+        self.model.add(keras.layers.Dense(64, activation="relu", input_shape=input_shape))
+        self.model.add(keras.layers.Dense(num_classes, activation = "softmax"))
 
-        num_labels = self.data["label_binary_matrix"].shape[1]
-
-        # Construct model
-        new_model = Sequential()
-
-        # First layer
-        new_model.add(
-            Conv2D(
-                filters=16,
-                kernel_size=2,
-                input_shape=model_input_shape,
-                activation="relu",
-            )
-        )
-
-        new_model.add(MaxPooling2D(pool_size=2))
-        new_model.add(Dropout(0.2))
-        # Second layer
-        new_model.add(Conv2D(filters=32, kernel_size=2, activation="relu"))
-        new_model.add(MaxPooling2D(pool_size=2))
-        new_model.add(Dropout(0.2))
-
-        # Third layer
-        new_model.add(Conv2D(filters=64, kernel_size=2, activation="relu"))
-        new_model.add(MaxPooling2D(pool_size=2))
-        new_model.add(Dropout(0.2))
-
-        # Forth layer
-        new_model.add(Conv2D(filters=128, kernel_size=2, activation="relu"))
-        new_model.add(MaxPooling2D(pool_size=2))
-        new_model.add(Dropout(0.2))
-        new_model.add(GlobalAveragePooling2D())
-
-        new_model.add(Dense(num_labels, activation="softmax"))
-        self.model = new_model
+        self._compile()
 
     def _build_model_layers(self):
         input_shape = (193,)
@@ -165,31 +122,12 @@ class Model:
         print("Pre-training accuracy: %.4f%%" % acc)
         return acc or None
 
-    def train(self):
+    def train(self, x_train, y_train, test_data=None):
         """
-        Train model based on train and test datasets
+        Train model based
         """
 
-        num_epochs = 72
-        num_batch_size = 256
-
-        checkpointer = ModelCheckpoint(
-            filepath="saved_models/weights.best.basic_cnn.hdf5",
-            verbose=1,
-            save_best_only=True,
-        )
-
-        self.model.fit(
-            self.data["x_train"],
-            self.data["y_train"],
-            batch_size=num_batch_size,
-            epochs=num_epochs,
-            validation_data=(
-                self.data["x_test"],
-                self.data["y_test"],
-            ),
-            callbacks=[checkpointer],
-            verbose=1,
-        )
-
-        return model
+        self.model.fit(x_train, y_train, epochs = 50, batch_size = 24, verbose = 0)
+        if test_data:
+            l, a = self.model.evaluate(test_data["x_test"], test_data["y_test"], verbose = 0)
+            return l, a

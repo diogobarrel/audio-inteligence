@@ -20,16 +20,17 @@ from util.utils import timeit
 @timeit
 def build_features_dataframe(df_name: str, dataset, metadata):
     """
-    Uses metadata info to load all datas    et files and build
+    Uses metadata info to load all dataset files and build
     a pandas dataframe of those audio features
     """
-    features, labels, data = np.empty((0, 193)), np.empty(0), np.empty(0)  # 193 => total features
+    features, labels, data = np.empty((0, 193)), np.empty(
+        0), np.empty(0)  # 193 => total features
     # Iterate through each sound file and extract the features
     metadata = pd.read_csv(metadata)
     for _, row in metadata.iterrows():
 
         file_name = os.path.join(
-            os.path.abspath(dataset),
+            os.path.abspath(dataset) + "/",
             "fold" + str(row["fold"]) + "/",
             str(row["slice_file_name"]),
         )
@@ -51,7 +52,8 @@ def build_features_dataframe(df_name: str, dataset, metadata):
                 {'fn': file_name, 'cl': label_from_metadata})
             continue  # ignore problematic audios
 
-        ext_features3 = np.hstack([audio_feat_list, label_from_audio, label_from_metadata])
+        ext_features3 = np.hstack(
+            [audio_feat_list, label_from_audio, label_from_metadata])
         ext_features = np.hstack(audio_feat_list)
         features = np.vstack([features, ext_features])
         labels = np.append(labels, label_from_audio)
@@ -61,7 +63,10 @@ def build_features_dataframe(df_name: str, dataset, metadata):
             features, dtype=np.float32), np.array(labels, dtype=np.int8)
 
     # Convert into a Panda dataframe
-    featuresdf = pd.DataFrame(data, columns=["mfccs", "chroma", "mel", "contrast", "tonnetz", "label", "label_title"])
+    featuresdf = pd.DataFrame(data, columns=[
+                              "mfccs", "chroma", "mel",
+                              "contrast", "tonnetz", "label",
+                              "label_title"])
 
     print("Finished feature extraction from ", len(featuresdf), " files")
 

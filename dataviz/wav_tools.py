@@ -17,6 +17,7 @@ class WavFileHelper():
     Main class created to manage audio: read sound file proprieties, play sound
     and transform it in digital signal
     """
+
     def read_file_props(self: WavFileHelper, file: str):
         """
         read file
@@ -48,7 +49,6 @@ class WavFileHelper():
         sig = numpy.fromstring(sig, 'Int16')
         return sig
 
-
     @utils.timeit
     def plot_wave_spectrum(self, signals, plots=1):
         """ plot wave and spectrum of the signal wave file """
@@ -63,9 +63,9 @@ class WavFileHelper():
 
             c = plt.subplot(212)
             Pxx, freqs, bins, im = c.specgram(sig,
-                                            NFFT=1024,
-                                            Fs=16000,
-                                            noverlap=900)
+                                              NFFT=1024,
+                                              Fs=16000,
+                                              noverlap=900)
             c.set_xlabel('Time')
             c.set_ylabel('Frequency')
             plt.show()
@@ -82,9 +82,9 @@ class WavFileHelper():
 
                 c = plt.subplot(212)
                 Pxx, freqs, bins, im = c.specgram(sig,
-                                                NFFT=1024,
-                                                Fs=16000,
-                                                noverlap=900)
+                                                  NFFT=1024,
+                                                  Fs=16000,
+                                                  noverlap=900)
                 c.set_xlabel('Time')
                 c.set_ylabel('Frequency')
 

@@ -6,9 +6,9 @@ HOME = os.environ['HOME'] + '/'
 WORKSPACE = 'projects/audio-inteligence/'
 DATASETS = HOME + 'ufop/tcc/datasets/'
 
-URBANSOUND_8K = DATASETS + 'UrbanSound8K/'
-URBANSOUND_8K_AUDIO = URBANSOUND_8K + 'audio/'
-URBANSOUND_8K_METADATA = URBANSOUND_8K + 'metadata/UrbanSound8K.csv'
+URBANSOUND_8K = DATASETS + 'UrbanSound8K'
+URBANSOUND_8K_AUDIO = URBANSOUND_8K + '/audio'
+URBANSOUND_8K_METADATA = URBANSOUND_8K + '/metadata/UrbanSound8K.csv'
 FOLDERS = ['fold1', 'fold2', 'fold3', 'fold4', 'fold5', 'fold6', 'fold7',
            'fold8', 'fold9', 'fold10']
 

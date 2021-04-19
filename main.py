@@ -1,19 +1,19 @@
 """
 Driver
 """
+from concurrent.futures import ThreadPoolExecutor
+import sys
 import logging
 import glob
 import os
 
-from data import data_utils
-from data.model import Model as CnnModel
+from sklearn.model_selection import KFold
+from data import data_utils, model
+import numpy as np
 
 from audio import signal
 from audio.audio import AudioFile
 from util.host import get_samples, CHOSEN_DATASET, CHOSEN_METADATA, DATAFRAME
-
-import numpy as np
-
 
 def plot_samples():
     audio_samples = get_samples()
@@ -28,48 +28,115 @@ def plot_samples():
 
 
 def proccess_dataset():
+    """ Proccess whole datased and and creates .npz files on a new folder """
 
-    def parse_audio_files(parent_dir, sub_dir, file_ext='*.wav'):
-        features, labels = np.empty((0, 193)), np.empty(
-            0)  # 193 => total features
+    def process_audio_file(fn):
+        features, labels = np.empty((0,193)), np.empty(0) # 193 => total features
+
+        audio_file = AudioFile(fn)
+        audio_file.extract_features()
+
+        if not audio_file._feat.values():
+            logging.warning(f'broken file: {fn}.')
+            return False, False # ignore problematic audios
+
+        ext_features = np.hstack(list(audio_file._feat.values()))
+        ext_label = int(fn.split('/')[9].split('-')[1])
+
+        return [ext_features, ext_label]
+
+    def parse_audio_folder(parent_dir, sub_dir, file_ext='*.wav'):
+        folder_features, folder_labels = np.empty((0,193)), np.empty(0) # 193 => total features
+
         for fn in glob.glob(os.path.join(parent_dir, sub_dir, file_ext)):
-            audio_file = AudioFile(fn)
-            audio_file.extract_features()
-            ext_features = np.hstack(list(audio_file._feat.values()))
-            features = np.vstack([features, ext_features])
-            logging.warn(fn)
-            labels = np.append(labels, int(fn.split('/')[9].split('-')[1]))
-        return np.array(features, dtype=np.float32), np.array(labels, dtype=np.int8)
+            ext_features, ext_labels = process_audio_file(fn)
+            if isinstance(ext_features, bool) and not ext_features:
+                continue
+
+            folder_features = np.vstack([folder_features, ext_features])
+            folder_labels = np.append(folder_labels, ext_labels)
+
+        return np.array(folder_features, dtype=np.float32), np.array(folder_labels, dtype=np.int8)
 
     # Pre-process and extract feature from the data
-    parent_dir = f'{CHOSEN_DATASET}audio'
-    save_dir = f'{CHOSEN_DATASET}processed/'
+    parent_dir = f'{CHOSEN_DATASET}/audio'
+    save_dir = f'{CHOSEN_DATASET}/processed'
     sub_dirs = np.array(['fold1', 'fold2', 'fold3', 'fold4',
                          'fold5', 'fold6', 'fold7', 'fold8',
                          'fold9', 'fold10'])
 
     for sub_dir in sub_dirs:
-        features, labels = parse_audio_files(parent_dir, sub_dir)
-        np.savez("{0}{1}".format(save_dir, sub_dir), features=features,
+        features, labels = parse_audio_folder(parent_dir, sub_dir)
+        np.savez("{0}/{1}".format(save_dir, sub_dir), features=features,
                  labels=labels)
 
 
-def build_dataframe(dataframe):
-    return data_utils.build_features_dataframe(
-        dataframe, CHOSEN_DATASET, CHOSEN_METADATA
-    )
+def get_data_from_dataframe(dataframe, build=False):
+    data = data_utils.read_dataframe(f"./{DATAFRAME}")
+    if not data or data.empty and build:
+        logging.warn(
+            f'Building dataframe {DATAFRAME} from dataset {CHOSEN_DATASET}')
+        df = data_utils.build_features_dataframe(
+            DATAFRAME, CHOSEN_DATASET, CHOSEN_METADATA)
+        data = data_utils.read_dataframe(f"./{DATAFRAME}")
+
+    return data
 
 
-"""
-Justs gonna build dataframe and compile model
-"""
-# try:
-# data = data_utils.read_dataframe(f"./{DATAFRAME}")
-# if not data or data.empty:
-#     df = build_dataframe(DATAFRAME)
-#     data = data_utils.read_dataframe(f"./{DATAFRAME}")
-# cnn_model = CnnModel(dataframe=data)
-# cnn_model.train()
-# cnn_model.accuracy()
-# process_audio_files()
-proccess_dataset()
+def get_data_from_processed_files():
+    ## Train and evaluate via 10-Folds cross-validation ###
+    accuracies = []
+    folds = np.array(['fold1', 'fold2', 'fold3', 'fold4',
+                      'fold5', 'fold6', 'fold7', 'fold8',
+                     'fold9', 'fold10'])
+
+    load_dir = f"{CHOSEN_DATASET}/processed"
+    kf = KFold(n_splits=10)
+    for train_index, test_index in kf.split(folds):
+        x_train, y_train = [], []
+        for ind in train_index:
+            data = np.load("{0}/{1}.npz".format(load_dir, folds[ind]))
+            x_train.append(data["features"])
+            y_train.append(data["labels"])
+        x_train = np.concatenate(x_train, axis=0)
+        y_train = np.concatenate(y_train, axis=0)
+
+        data = np.load("{0}/{1}.npz".format(load_dir, folds[test_index][0]))
+        x_test = data["features"]
+        y_test = data["labels"]
+
+
+        return ((x_test, y_test), (x_train, y_train))
+
+    print("Average 10 Folds Accuracy: {0}".format(np.mean(accuracies)))
+
+#proccess_dataset()
+CnnModel = model.Model
+cnn_model = CnnModel()
+
+accuracies = []
+folds = np.array(['fold1', 'fold2', 'fold3', 'fold4',
+                    'fold5', 'fold6', 'fold7', 'fold8',
+                    'fold9', 'fold10'])
+
+load_dir = f"{CHOSEN_DATASET}/processed"
+kf = KFold(n_splits=10)
+for train_index, test_index in kf.split(folds):
+    x_train, y_train = [], []
+    for ind in train_index:
+        data = np.load("{0}/{1}.npz".format(load_dir, folds[ind]))
+        x_train.append(data["features"])
+        y_train.append(data["labels"])
+    x_train = np.concatenate(x_train, axis=0)
+    y_train = np.concatenate(y_train, axis=0)
+
+    data = np.load("{0}/{1}.npz".format(load_dir, folds[test_index][0]))
+    x_test = data["features"]
+    y_test = data["labels"]
+    
+
+    l, a = cnn_model.train(x_test, y_test, test_data={'x_test': x_test, 'y_test': y_test})
+    accuracies.append(a)
+    print("Loss: {0} | Accuracy: {1}".format(l, a))
+
+print("Average 10 Folds Accuracy: {0}".format(np.mean(accuracies)))

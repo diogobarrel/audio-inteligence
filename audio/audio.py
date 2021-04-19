@@ -80,6 +80,8 @@ class AudioFile:
             logging.exception(
                 "Exception while parsing file: %s", self.file)
             logging.exception(io_error)
-            return None
+
         except Exception as e:
+            logging.exception(f'Failed parsing audio {self.file}')
             logging.exception(e)
+
