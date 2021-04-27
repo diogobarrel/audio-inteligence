@@ -10,10 +10,13 @@ import os
 from sklearn.model_selection import KFold
 from data import data_utils, model
 import numpy as np
+import pandas as pd
 
 from audio import signal
 from audio.audio import AudioFile
-from util.host import get_samples, CHOSEN_DATASET, CHOSEN_METADATA, DATAFRAME
+from util.host import get_samples, CHOSEN_DATASET, CHOSEN_METADATA, DATAFRAME, ESC_50_META
+from util.utils import timeit
+
 
 def plot_samples():
     audio_samples = get_samples()
@@ -31,14 +34,15 @@ def proccess_dataset():
     """ Proccess whole datased and and creates .npz files on a new folder """
 
     def process_audio_file(fn):
-        features, labels = np.empty((0,193)), np.empty(0) # 193 => total features
+        features, labels = np.empty((0, 193)), np.empty(
+            0)  # 193 => total features
 
         audio_file = AudioFile(fn)
         audio_file.extract_features()
 
         if not audio_file._feat.values():
             logging.warning(f'broken file: {fn}.')
-            return False, False # ignore problematic audios
+            return False, False  # ignore problematic audios
 
         ext_features = np.hstack(list(audio_file._feat.values()))
         ext_label = int(fn.split('/')[9].split('-')[1])
@@ -46,7 +50,8 @@ def proccess_dataset():
         return [ext_features, ext_label]
 
     def parse_audio_folder(parent_dir, sub_dir, file_ext='*.wav'):
-        folder_features, folder_labels = np.empty((0,193)), np.empty(0) # 193 => total features
+        folder_features, folder_labels = np.empty(
+            (0, 193)), np.empty(0)  # 193 => total features
 
         for fn in glob.glob(os.path.join(parent_dir, sub_dir, file_ext)):
             ext_features, ext_labels = process_audio_file(fn)
@@ -105,38 +110,53 @@ def get_data_from_processed_files():
         x_test = data["features"]
         y_test = data["labels"]
 
-
         return ((x_test, y_test), (x_train, y_train))
 
     print("Average 10 Folds Accuracy: {0}".format(np.mean(accuracies)))
 
-#proccess_dataset()
-CnnModel = model.Model
-cnn_model = CnnModel()
+@timeit
+def train_and_evaluate_model():
+    CnnModel = model.Model
+    cnn_model = CnnModel()
 
-accuracies = []
-folds = np.array(['fold1', 'fold2', 'fold3', 'fold4',
-                    'fold5', 'fold6', 'fold7', 'fold8',
-                    'fold9', 'fold10'])
+    accuracies = []
+    folds = np.array(['fold1', 'fold2', 'fold3', 'fold4',
+                      'fold5', 'fold6', 'fold7', 'fold8',
+                      'fold9', 'fold10'])
 
-load_dir = f"{CHOSEN_DATASET}/processed"
-kf = KFold(n_splits=10)
-for train_index, test_index in kf.split(folds):
-    x_train, y_train = [], []
-    for ind in train_index:
-        data = np.load("{0}/{1}.npz".format(load_dir, folds[ind]))
-        x_train.append(data["features"])
-        y_train.append(data["labels"])
-    x_train = np.concatenate(x_train, axis=0)
-    y_train = np.concatenate(y_train, axis=0)
+    load_dir = f"{CHOSEN_DATASET}/processed"
+    kf = KFold(n_splits=10)
+    for train_index, test_index in kf.split(folds):
+        x_train, y_train = [], []
+        for ind in train_index:
+            data = np.load("{0}/{1}.npz".format(load_dir, folds[ind]))
+            x_train.append(data["features"])
+            y_train.append(data["labels"])
 
-    data = np.load("{0}/{1}.npz".format(load_dir, folds[test_index][0]))
-    x_test = data["features"]
-    y_test = data["labels"]
-    
+        x_train = np.concatenate(x_train, axis=0)
+        y_train = np.concatenate(y_train, axis=0)
 
-    l, a = cnn_model.train(x_test, y_test, test_data={'x_test': x_test, 'y_test': y_test})
-    accuracies.append(a)
-    print("Loss: {0} | Accuracy: {1}".format(l, a))
+        data = np.load("{0}/{1}.npz".format(load_dir, folds[test_index][0]))
+        x_test = data["features"]
+        y_test = data["labels"]
 
-print("Average 10 Folds Accuracy: {0}".format(np.mean(accuracies)))
+        cnn_model.train(x_train, y_train)
+        l, a = cnn_model.accuracy(x_test, y_test)
+        accuracies.append(a)
+        print("Loss: {0} | Accuracy: {1}".format(l, a))
+
+    print("Average 10 Folds Accuracy: {0}".format(np.mean(accuracies)))
+
+
+# train_and_evaluate_model()
+
+def read_esc_metadata():
+    metadata = pd.read_csv(f'{ESC_50_META}/esc50.csv')
+    print(metadata.head())
+    # Making a new df with the necesary info
+    metadata["verbose_category"] = metadata["category"]
+    metadata["category"] = pd.Categorical(metadata["category"]).codes
+    metadata = metadata.drop(columns=["fold", "target", "esc10", "src_file", "take"])
+    print(metadata.head())
+    count_category = metadata.groupby('category').count()
+    # count_category.plot(kind="bar")

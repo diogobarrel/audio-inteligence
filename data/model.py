@@ -107,27 +107,15 @@ class Model:
             # Display model architecture summary
             self.model.summary()
             print("Model compiled successfully!")
-
         except Exception as e:
             print("Error while compiling model")
             logging.exception(e)
             return None
 
-    def accuracy(self):
-        score = self.model.evaluate(
-            self.data["x_test"], self.data["y_test"], verbose=1
-        )
-        acc = 100 * score[1]
-
-        print("Pre-training accuracy: %.4f%%" % acc)
-        return acc or None
-
     def train(self, x_train, y_train, test_data=None):
-        """
-        Train model based
-        """
 
         self.model.fit(x_train, y_train, epochs = 50, batch_size = 24, verbose = 0)
-        if test_data:
-            l, a = self.model.evaluate(test_data["x_test"], test_data["y_test"], verbose = 0)
-            return l, a
+
+    def accuracy(self, x_test, y_test):
+        loss, accuracy = self.model.evaluate(x_test, y_test, verbose = 0)
+        return loss, accuracy

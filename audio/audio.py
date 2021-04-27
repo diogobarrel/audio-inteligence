@@ -43,7 +43,7 @@ class AudioFile:
 
         return (num_channels, sample_rate, bit_depth)
 
-    def extract_features(self) -> list:
+    def extract_features(self):
         """
         Extracts mfcc and mfccs from audio file
         """

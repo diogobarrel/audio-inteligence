@@ -12,6 +12,10 @@ URBANSOUND_8K_METADATA = URBANSOUND_8K + '/metadata/UrbanSound8K.csv'
 FOLDERS = ['fold1', 'fold2', 'fold3', 'fold4', 'fold5', 'fold6', 'fold7',
            'fold8', 'fold9', 'fold10']
 
+ESC_50 = DATASETS + 'ESC-50'
+ESC_50_AUDIO = ESC_50 + '/audio'
+ESC_50_META = ESC_50 + '/meta'
+
 # SAMPLES
 SAMPLE_DIRECTORY=HOME + WORKSPACE + 'util/samples/'
 SAMPLE_FILES=['17913-4-1-0.wav', '21684-9-0-50.wav', '7061-6-0-0.wav']
