@@ -17,6 +17,7 @@ from audio.audio import AudioFile
 from util.host import get_samples, CHOSEN_DATASET, CHOSEN_METADATA, DATAFRAME, ESC_50_META
 from util.utils import timeit
 
+from audio import wav_tools
 
 def plot_samples():
     audio_samples = get_samples()
@@ -24,11 +25,31 @@ def plot_samples():
     for sample in audio_samples:
         # audio_file = AudioFile(sample)
         # print(audio_file.extract_mfcc_features())
-        signal.spectogram(sample, index=f"{ROW}{COL}")
-        signal.stft_spectogram(sample, index=f"{ROW+1}{COL}")
+        signal.spectogram(sample, index=f"_{ROW}{COL}")
+        signal.stft_spectogram(sample, index=f"_{ROW+1}{COL}")
         # signal.draw_spec3(sample, index=f'{ROW+2}{COL}')
         COL += 1
 
+def plot_augumented_samples():
+    audio_samples = get_samples()
+    ROW, COL = 1, 1
+    for sample in audio_samples:
+        audio_file = AudioFile(sample)
+        audio_file.extract_features()
+        audio_file.display();
+        
+        signal.spectogram(audio_file.file, index=f"_spec_{ROW}{COL}")
+        # signal.stft_spectogram(audio_file, index=f"_stft_spec_{ROW+1}{COL}")
+        audio_file.wave_form(index=f"_wav_{ROW+1}{COL}")
+
+        augumented_audio_data = wav_tools.time_shifting(audio_file)
+        audio_file.sound_info = augumented_audio_data
+
+        audio_file.spectogram(index=f"_aug_spec_{ROW}{COL}")
+        # signal.stft_spectogram(audio_file, index=f"_aug_stft_spec_{ROW+1}{COL}")
+        audio_file.wave_form(index=f"_aug_wave_{ROW+1}{COL}")
+        # signal.draw_spec3(sample, index=f'{ROW+2}{COL}')
+        COL += 1
 
 def proccess_dataset():
     """ Proccess whole datased and and creates .npz files on a new folder """
@@ -114,6 +135,7 @@ def get_data_from_processed_files():
 
     print("Average 10 Folds Accuracy: {0}".format(np.mean(accuracies)))
 
+
 @timeit
 def train_and_evaluate_model():
     CnnModel = model.Model
@@ -156,7 +178,11 @@ def read_esc_metadata():
     # Making a new df with the necesary info
     metadata["verbose_category"] = metadata["category"]
     metadata["category"] = pd.Categorical(metadata["category"]).codes
-    metadata = metadata.drop(columns=["fold", "target", "esc10", "src_file", "take"])
+    metadata = metadata.drop(
+        columns=["fold", "target", "esc10", "src_file", "take"])
     print(metadata.head())
     count_category = metadata.groupby('category').count()
     # count_category.plot(kind="bar")
+
+
+plot_augumented_samples()

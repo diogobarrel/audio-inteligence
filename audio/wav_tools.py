@@ -1,6 +1,7 @@
 """
 Class created to handle wav files
 """
+import logging
 
 import librosa
 
@@ -10,38 +11,30 @@ import pandas as pd
 from util import utils
 
 @utils.timeit
-def noise_injection(wav, noise_factor):
-    noise = np.random.randn(len(wav))
-    augmented_wav = wav + noise_factor * noise
+def noise_injection(audio_file, noise_factor=None):
+    
+    # Permissible noise factor value = x > 0.004
+    noise_factor = 0.07
+    data = audio_file.sound_info
+    noise = np.random.randn(len(data))
+    logging.warn(noise)
+    augmented_data = data + noise_factor * noise
+    augmented_data = augmented_data.astype(type(data[0]))
 
     # Cast back to same data type
-    return augmented_wav.astype(type(wav[0]))
+    return augmented_data
 
 
 @utils.timeit
-def time_shifting(wav, shift_direction):
-    SHIFT_MAX = wav.sampling_rate/10
-
-    shift_seed = np.random.randint(wav.sampling_rate * SHIFT_MAX)
-    if shift_direction == 'right':
-        shift = -shift_seed
-
-    elif self.shift_direction == 'both':
-        direction = np.random.randint(0, 2)
-        if direction == 1:
-            shift = -shift_seed
-
-    augmented_wav = np.roll(wav.audio, shift)
+def time_shifting(audio_file):
+    shift = int(audio_file.sample_rate/20)
+    augmented_wav = np.roll(audio_file.audio, shift)
     # Set to silence for heading/tailing
-    if shift > 0:
-        augmented_wav[:shift] = 0
-    else:
-        augmented_wav[shift:] = 0
-    return augmented_wav.astype(type(wav.audio[0]))
+    return augmented_wav;
 
 
 @utils.timeit
-def time_stretching(wav)
+def time_stretching(wav):
     """
     The process of changing the speed/duration of sound without affecting the pitch of sound.
     This can be achieved using librosa’s time_stretch function.

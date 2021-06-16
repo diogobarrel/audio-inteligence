@@ -4,7 +4,11 @@ Audio File basic handling
 import struct
 import logging
 import librosa
+import IPython.display as ipd
+import wave
 import numpy as np
+import matplotlib.pyplot as plt
+from scipy.io import wavfile
 
 
 class AudioFile:
@@ -13,8 +17,11 @@ class AudioFile:
     """
     file = None
     __file_type = 'wav'
-    audio = None
+    num_channels = 1
     sample_rate = 0
+    bit_depth = 0
+    audio = None
+    sound_info = None
     stft = None
     _feat = {}
 
@@ -22,36 +29,20 @@ class AudioFile:
         self.file = file
         print(f'new AudioFile {self}')
 
-    def read_props(self) -> (int, int, int):
-        """
-        Reads audio file and return its number of channels,
-        sample_rate and bit_depth.
-        """
-        audio_file = open(self.file, "rb")
-
-        # riff = audio_file.read(12)
-        fmt = audio_file.read(36)
-
-        num_channels_string = fmt[10:12]
-        num_channels = struct.unpack('<H', num_channels_string)[0]
-
-        sample_rate_string = fmt[12:16]
-        sample_rate = struct.unpack("<I", sample_rate_string)[0]
-
-        bit_depth_string = fmt[22:24]
-        bit_depth = struct.unpack("<H", bit_depth_string)[0]
-
-        return (num_channels, sample_rate, bit_depth)
+    def save(self, path):
+        return librosa.output.write_wav(path, self.audio, self.sample_rate)
 
     def extract_features(self):
         """
-        Extracts mfcc and mfccs from audio file
+        Extracts handcrafted audio features from audio file
         """
 
         try:
-            # converts the sampling rate to 22.05 KHz
-            # normalise the data so the bit-depth values range between -1 and 1
-            # flattens the audio channels into mono
+            """
+            By default, Librosa’s load function will convert the sampling rate to 22.05khz,
+            as well as reducing the number of channels to 1(mono),
+            and normalise the data so that the values will range from -1 to 1.
+            """
             audio, sample_rate = librosa.load(self.file)
             stft = np.abs(librosa.stft(audio))
             mfccs = np.mean(librosa.feature.mfcc(
@@ -76,6 +67,12 @@ class AudioFile:
                 'tonnetz': tonnetz,
             }
 
+            wav = wave.open(self.file, 'r')
+            frames = wav.readframes(-1)
+            self.sound_info = np.fromstring(frames, 'int16')
+            self.frame_rate = wav.getframerate()
+            wav.close()
+
         except IOError as io_error:
             logging.exception(
                 "Exception while parsing file: %s", self.file)
@@ -85,3 +82,24 @@ class AudioFile:
             logging.exception(f'Failed parsing audio {self.file}')
             logging.exception(e)
 
+
+    def spectogram(self, index: str = 'X'):
+        sound_info, frame_rate = self.sound_info, self.frame_rate
+        plt.figure(num=None, figsize=(19, 12))
+        plt.subplot(111)
+        plt.title('spectrogram of %r' % self.file)
+        plt.specgram(sound_info, Fs=frame_rate)
+        plt.savefig(f'spectrogram{index}.png')
+
+    def wave_form(self, index):
+        # Plot the signal read from wav file
+        plt.subplot(211)
+        plt.title(f'waveform of a wav file {self.file}')
+        plt.plot(self.sound_info)
+        plt.xlabel('Sample')
+        plt.ylabel('Amplitude')
+
+        plt.savefig(f'waveform{index}.png')
+    
+    def display(self):
+        return ipd.Audio(self.audio)
