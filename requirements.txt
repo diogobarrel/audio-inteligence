@@ -12,7 +12,6 @@ scipy
 
 # torch
 # torchaudio
-keras
 tensorflow
 
 # audio
@@ -20,4 +19,5 @@ wave # stuff to parse WAV files
 pyaudio # used to connect to input and record audio
 simpleaudio # generates and play audio files
 librosa # audio normalization
+IPython # audio file POJO
 

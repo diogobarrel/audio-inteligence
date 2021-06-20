@@ -3,7 +3,7 @@ import os
 
 HOME = os.environ['HOME'] + '/'
 # DATASTES
-WORKSPACE = 'projects/audio-inteligence/'
+WORKSPACE = '.ghostship/proj/audio-inteligence/'
 DATASETS = HOME + 'ufop/tcc/datasets/'
 
 URBANSOUND_8K = DATASETS + 'UrbanSound8K'
@@ -18,7 +18,7 @@ ESC_50_META = ESC_50 + '/meta'
 
 # SAMPLES
 SAMPLE_DIRECTORY=HOME + WORKSPACE + 'util/samples/'
-SAMPLE_FILES=['17913-4-1-0.wav', '21684-9-0-50.wav', '7061-6-0-0.wav']
+SAMPLE_FILES=['gunshots.wav', 'jackhammer.wav', 'sanfona.wav']
 
 CHOSEN_DATASET = URBANSOUND_8K
 CHOSEN_METADATA = URBANSOUND_8K_METADATA

@@ -12,10 +12,9 @@ from util import utils
 
 @utils.timeit
 def noise_injection(audio_file, noise_factor=None):
-    
     # Permissible noise factor value = x > 0.004
-    noise_factor = 0.07
-    data = audio_file.sound_info
+    noise_factor = 0.01
+    data = audio_file.audio
     noise = np.random.randn(len(data))
     logging.warn(noise)
     augmented_data = data + noise_factor * noise

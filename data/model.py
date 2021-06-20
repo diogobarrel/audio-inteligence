@@ -3,11 +3,10 @@ import logging
 import numpy as np
 import tensorflow as tf
 
-import keras
-from keras.models import Sequential
-from keras.layers import Dense, Dropout, Activation
-from keras.layers import Conv2D, MaxPooling2D, GlobalAveragePooling2D
-from keras.callbacks import ModelCheckpoint
+from tensorflow.keras.models import Sequential
+# from tf.keras.layers import Dense, Dropout, Activation
+# from tf.keras.layers import Conv2D, MaxPooling2D, GlobalAveragePooling2D
+# from tf.keras.callbacks import ModelCheckpoint
 
 from sklearn import metrics
 
@@ -70,29 +69,29 @@ class Model:
         # DATA FORMAT
         input_shape = (193,)
         num_classes = 10
-        keras.backend.clear_session()
+        tf.keras.backend.clear_session()
 
-        self.model = keras.models.Sequential()
-        self.model.add(keras.layers.Dense(256, activation="relu", input_shape=input_shape))
-        self.model.add(keras.layers.Dense(128, activation="relu", input_shape=input_shape))
-        self.model.add(keras.layers.Dense(64, activation="relu", input_shape=input_shape))
-        self.model.add(keras.layers.Dense(num_classes, activation = "softmax"))
+        self.model = tf.keras.models.Sequential()
+        self.model.add(tf.keras.layers.Dense(256, activation="relu", input_shape=input_shape))
+        self.model.add(tf.keras.layers.Dense(128, activation="relu", input_shape=input_shape))
+        self.model.add(tf.keras.layers.Dense(64, activation="relu", input_shape=input_shape))
+        self.model.add(tf.keras.layers.Dense(num_classes, activation = "softmax"))
 
         self._compile()
 
     def _build_model_layers(self):
         input_shape = (193,)
         num_clases = 10
-        keras.backend.clear_session()
+        tf.keras.backend.clear_session()
 
-        self.model = keras.models.Sequential()
-        self.model.add(keras.layers.Dense(
+        self.model = tf.keras.models.Sequential()
+        self.model.add(tf.keras.layers.Dense(
             256, activation='relu', input_shape=input_shape))
-        self.model.add(keras.layers.Dense(
+        self.model.add(tf.keras.layers.Dense(
             128, activation='relu', input_shape=input_shape))
-        self.model.add(keras.layers.Dense(
+        self.model.add(tf.keras.layers.Dense(
             64, activation='relu', input_shape=input_shape))
-        self.model.add(keras.layers.Dense(
+        self.model.add(tf.keras.layers.Dense(
             num_clases, activation='softmax', input_shape=input_shape))
 
     def _compile(self):
@@ -100,8 +99,8 @@ class Model:
         Compiles model based on test dataset
         """
         try:
-            self.model.compile(optimizer=keras.optimizers.Adam(1e-4),
-                               loss=keras.losses.SparseCategoricalCrossentropy(),
+            self.model.compile(optimizer=tf.keras.optimizers.Adam(1e-4),
+                               loss=tf.keras.losses.SparseCategoricalCrossentropy(),
                                metrics=["accuracy"])
 
             # Display model architecture summary

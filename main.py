@@ -7,15 +7,15 @@ import logging
 import glob
 import os
 
+import pandas as pd
+import numpy as np
+
 from sklearn.model_selection import KFold
 from data import data_utils, model
-import numpy as np
-import pandas as pd
 
-from audio import signal
 from audio.audio import AudioFile
-from util.host import get_samples, CHOSEN_DATASET, CHOSEN_METADATA, DATAFRAME, ESC_50_META
 from util.utils import timeit
+from util.host import get_samples, CHOSEN_DATASET, CHOSEN_METADATA, DATAFRAME, ESC_50_META
 
 from audio import wav_tools
 
@@ -32,24 +32,24 @@ def plot_samples():
 
 def plot_augumented_samples():
     audio_samples = get_samples()
-    ROW, COL = 1, 1
     for sample in audio_samples:
         audio_file = AudioFile(sample)
         audio_file.extract_features()
-        audio_file.display();
-        
-        signal.spectogram(audio_file.file, index=f"_spec_{ROW}{COL}")
+        # audio_file.wave_form(index=f"_wav_{ROW+1}{COL}")
+        audio_file.plot_audio(index="")
+
+        # audio_file.display()
+        # signal.spectogram(audio_file.file, index=f"_spec_{ROW}{COL}")
         # signal.stft_spectogram(audio_file, index=f"_stft_spec_{ROW+1}{COL}")
-        audio_file.wave_form(index=f"_wav_{ROW+1}{COL}")
 
-        augumented_audio_data = wav_tools.time_shifting(audio_file)
-        audio_file.sound_info = augumented_audio_data
+        augumented_audio_data = wav_tools.noise_injection(audio_file)
+        audio_file.audio = augumented_audio_data
+        audio_file.plot_audio(index="aug")
 
-        audio_file.spectogram(index=f"_aug_spec_{ROW}{COL}")
+        # audio_file.spectogram(index=f"_aug_spec_{ROW}{COL}")
         # signal.stft_spectogram(audio_file, index=f"_aug_stft_spec_{ROW+1}{COL}")
-        audio_file.wave_form(index=f"_aug_wave_{ROW+1}{COL}")
+        # audio_file.wave_form(index=f"_aug_wave_{ROW+1}{COL}")
         # signal.draw_spec3(sample, index=f'{ROW+2}{COL}')
-        COL += 1
 
 def proccess_dataset():
     """ Proccess whole datased and and creates .npz files on a new folder """
