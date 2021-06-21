@@ -3,7 +3,7 @@ import os
 
 HOME = os.environ['HOME'] + '/'
 # DATASTES
-WORKSPACE = '.ghostship/proj/audio-inteligence/'
+WORKSPACE = 'projects/audio-inteligence/'
 DATASETS = HOME + 'ufop/tcc/datasets/'
 
 URBANSOUND_8K = DATASETS + 'UrbanSound8K'

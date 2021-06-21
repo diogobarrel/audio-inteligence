@@ -12,7 +12,9 @@ import numpy as np
 
 from sklearn.model_selection import KFold
 from data import data_utils, model
+from data import dataviz
 
+import data
 from audio.audio import AudioFile
 from util.utils import timeit
 from util.host import get_samples, CHOSEN_DATASET, CHOSEN_METADATA, DATAFRAME, ESC_50_META
@@ -36,16 +38,16 @@ def plot_augumented_samples():
         audio_file = AudioFile(sample)
         audio_file.extract_features()
         # audio_file.wave_form(index=f"_wav_{ROW+1}{COL}")
-        audio_file.plot_audio(index="")
+        # audio_file.plot_audio(index="")
+        dataviz.plot(audio_file)
+
 
         # audio_file.display()
         # signal.spectogram(audio_file.file, index=f"_spec_{ROW}{COL}")
         # signal.stft_spectogram(audio_file, index=f"_stft_spec_{ROW+1}{COL}")
 
-        augumented_audio_data = wav_tools.noise_injection(audio_file)
-        audio_file.audio = augumented_audio_data
-        audio_file.plot_audio(index="aug")
-
+        aug_file = wav_tools.Augment(audio_file, 'noise_injection')
+        dataviz.plot(aug_file, index='noisy')
         # audio_file.spectogram(index=f"_aug_spec_{ROW}{COL}")
         # signal.stft_spectogram(audio_file, index=f"_aug_stft_spec_{ROW+1}{COL}")
         # audio_file.wave_form(index=f"_aug_wave_{ROW+1}{COL}")
