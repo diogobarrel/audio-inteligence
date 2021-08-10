@@ -57,24 +57,37 @@ def proccess_dataset():
     """ Proccess whole datased and and creates .npz files on a new folder """
 
     def process_audio_file(fn):
-        features, labels = np.empty((0, 193)), np.empty(
-            0)  # 193 => total features
-
-        audio_file = AudioFile(fn)
-        audio_file.extract_features()
+        try: 
+            audio_file = AudioFile(fn)
+            audio_file.extract_features()
+        except Exception as e:
+            logging.exception(f'failed parsing file: {fn}')
+            return False, False
 
         if not audio_file._feat.values():
             logging.warning(f'broken file: {fn}.')
             return False, False  # ignore problematic audios
 
         ext_features = np.hstack(list(audio_file._feat.values()))
+        """
+        The features object is a stack of the arrays returned from handcrafted features
+        shape of a sample obj:
+            {
+                'mfccs': shape(,40)
+                'chroma': shape(,12)
+                'mel': shape(,128)
+                'contrast': shape(,7)
+                'tonnetz': shape(,6)
+            }
+            total = shape(,193)
+        """
+
         ext_label = int(fn.split('/')[9].split('-')[1])
 
         return [ext_features, ext_label]
 
     def parse_audio_folder(parent_dir, sub_dir, file_ext='*.wav'):
-        folder_features, folder_labels = np.empty(
-            (0, 193)), np.empty(0)  # 193 => total features
+        folder_features, folder_labels = np.empty((0, 193)), np.empty(0) 
 
         for fn in glob.glob(os.path.join(parent_dir, sub_dir, file_ext)):
             ext_features, ext_labels = process_audio_file(fn)
@@ -186,5 +199,4 @@ def read_esc_metadata():
     count_category = metadata.groupby('category').count()
     # count_category.plot(kind="bar")
 
-
-plot_augumented_samples()
+proccess_dataset()
