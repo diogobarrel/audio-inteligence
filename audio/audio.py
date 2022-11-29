@@ -25,8 +25,8 @@ class AudioFile:
     audio = None
     stft = None
     _feat = {}
-    __STFT_FRAME_SIZE = 1024
-    __STFT_HOP_SIZE = 256
+    __STFT_FRAME_SIZE = 512
+    __STFT_HOP_SIZE = 128
 
     def __init__(self, file: str):
         """

@@ -1,8 +1,7 @@
 """
-Driver
+Main driver
 """
 from concurrent.futures import ThreadPoolExecutor
-import sys
 import logging
 import glob
 import os
@@ -14,7 +13,6 @@ from sklearn.model_selection import KFold
 from data import data_utils, model
 from data import dataviz
 
-import data
 from audio.audio import AudioFile
 from util.utils import timeit
 from util.host import get_samples, CHOSEN_DATASET, CHOSEN_METADATA, DATAFRAME, ESC_50_META
@@ -57,11 +55,12 @@ def proccess_dataset():
     """ Proccess whole datased and and creates .npz files on a new folder """
 
     def process_audio_file(fn):
+        print(f'parsing file: {fn}')
         try: 
             audio_file = AudioFile(fn)
             audio_file.extract_features()
         except Exception as e:
-            logging.exception(f'failed parsing file: {fn}')
+            logging.error(f'failed parsing file: {fn}')
             return False, False
 
         if not audio_file._feat.values():
@@ -199,4 +198,5 @@ def read_esc_metadata():
     count_category = metadata.groupby('category').count()
     # count_category.plot(kind="bar")
 
-proccess_dataset()
+# proccess_dataset()
+train_and_evaluate_model()
